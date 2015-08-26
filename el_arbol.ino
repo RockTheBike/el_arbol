@@ -9,10 +9,10 @@
 
 #define numLevels 15
 int pin[numLevels] = {
-  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A1, A2, A3};  
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A1, A2, A3};
 
 #define numTree 8
-byte tree[numTree] = { 
+byte tree[numTree] = {
   8,2,7,4,13,12,A2,10};
 
 #define numBranches 8
@@ -129,7 +129,7 @@ void loop() {
     whatState = risingAbove22;
     doTheSweep(); // do it immediately and it will happen every 20 seconds
     lastTime = time;  // it just got done
-  }    
+  }
 
   if ((whatState == risingAbove22) && (time - lastTime > 20000)) { // 20 seconds between 3-second sweeps
     doTheSweep();  // takes three seconds
@@ -141,7 +141,7 @@ void loop() {
     randomLights(); // takes 10 seconds
     lastTime = time;  // it just got done
     randomTime = 1500 + random(8500); // random amount of time 1.5 to 10 seconds
-  }  
+  }
 
   if ((voltage < 25) && (whatState == above25)) {
     whatState = fallingBelow25; // we are now falling
@@ -159,13 +159,13 @@ void loop() {
   if ((whatState == above25) && (time - lastTime > randomTime)) {
     if (randomTime & 1) {  // randomly choose between two behaviors
       randomLights(); // takes 10 seconds
-    } 
+    }
     else {
       doTheSweep();
     }
     lastTime = time;  // it just got done
     randomTime = 1500 + random(8500); // random amount of time 1.5 to 10 seconds
-  }    
+  }
 
 
 
@@ -192,8 +192,8 @@ void loop() {
 }
 
 void lightning(){
-  /* lightning is three little buzz buzz buzz of one of the five, then another,      
-   and another.  flickering is one second for each buzz.  pause between them       
+  /* lightning is three little buzz buzz buzz of one of the five, then another,
+   and another.  flickering is one second for each buzz.  pause between them
    0.5 seconds, 1 second pause between different branches buzzing  */
   for(i = 0; i < numLevels; i++) {
     digitalWrite(pin[i], HIGH);  // all lights ON
@@ -218,7 +218,7 @@ void allDark(){
   for(i = 0; i < numLevels; i++) {
     digitalWrite(pin[i], LOW);  // all lights off
   }
-  delay(allDarkTime); 
+  delay(allDarkTime);
 }
 
 void allOn(){
@@ -230,34 +230,34 @@ void allOn(){
 void doTheSweep(){
   for (i = 0; i < numTree; i++) { // Send light up the tree with a 100ms delay between each segment.
     digitalWrite(tree[i], HIGH);
-    delay(100);  
+    delay(100);
   }
   for (i = 0; i < numBranches; i++) { // Light the branches up with a 100 mS delay between each
     digitalWrite(branches[i], HIGH);
-    delay(100);  
+    delay(100);
   }
   delay(100);
   for (i = 0; i < numBranches; i++) { // 3. Now darken one branch at a time in the same order
     digitalWrite(branches[i], LOW);  // darken
-    delay(100); 
+    delay(100);
     digitalWrite(branches[i], HIGH); // turn it back on
-  }  
+  }
   delay(100);
   // Repeat step 3.
   for (i = 0; i < numBranches; i++) { // 3. Now darken one branch at a time in the same order
     digitalWrite(branches[i], 0);  // darken
-    delay(100); 
+    delay(100);
     digitalWrite(branches[i], 255); // turn it back on
-  }  
+  }
   delay(100);
   for (i = (numBranches-1); i >= 0; i--) {  // reverse order - start with last and go backwards
     digitalWrite(branches[i], 0);  // darken
-    delay(100);  
+    delay(100);
   }
   delay(100);
   for (i = (numTree-1); i >= 0; i--) {  // reverse order - start with last and go backwards
     digitalWrite(tree[i], 0);  // darken
-    delay(100);  
+    delay(100);
   }
   delay(100);
 }
@@ -269,7 +269,7 @@ void randomLights(){
     pattern = random(2048); // up to 11 bits
     for (i=0; i < numLevels; i++) if (pattern & 2^i) {
       digitalWrite(pin[i],255);
-    } 
+    }
     else {
       digitalWrite(pin[i],0);
     }
