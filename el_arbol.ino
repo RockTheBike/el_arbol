@@ -5,7 +5,7 @@
  * Jake <jake@spaz.org>
  */
 
-//#include <SoftPWM.h>
+#include <SoftPWM.h>
 
 #define numLevels 15
 int pin[numLevels] = {
@@ -88,7 +88,7 @@ void setup() {
   Serial.begin(57600);
 
   // Initialize Software PWM
-  //  SoftPWMBegin();
+  SoftPWMBegin();
 
   Serial.println("El Arbol 2.0");
 
@@ -97,8 +97,9 @@ void setup() {
   // init LED pins
   for(i = 0; i < numLevels; i++) {
     pinMode(pin[i],OUTPUT);
-    digitalWrite(pin[i], HIGH);  // default state is all lights on
+    SoftPWMSet(pin[i], 255);  // default state is all lights on
   }
+  SoftPWMSetFadeTime(ALL, 100, 100);
   randomSeed(analogRead(5));
 }
 
@@ -131,7 +132,7 @@ void loop() {
     lastTime = time;  // it just got done
   }
 
-  if ((whatState == risingAbove22) && (time - lastTime > 20000)) { // 20 seconds between 3-second sweeps
+  if ((whatState == risingAbove22) && (time - lastTime > 5000)) { // 20 seconds between 3-second sweeps
     doTheSweep();  // takes three seconds
     lastTime = time;  // it just got done
   }
@@ -140,14 +141,14 @@ void loop() {
     whatState = above25;
     randomLights(); // takes 10 seconds
     lastTime = time;  // it just got done
-    randomTime = 1500 + random(8500); // random amount of time 1.5 to 10 seconds
+    randomTime = 1500 + random(5500); // random amount of time 1.5 to 10 seconds
   }
 
   if ((voltage < 25) && (whatState == above25)) {
     whatState = fallingBelow25; // we are now falling
     lightning();
     lastTime = time;  // it just got done
-    randomTime = 750 + random(4250); // random amount of time 0.75 to 5 seconds
+    randomTime = 750 + random(3250); // random amount of time 0.75 to 5 seconds
   }
 
   if ((whatState == fallingBelow25) && (time - lastTime > randomTime)) {
@@ -164,7 +165,7 @@ void loop() {
       doTheSweep();
     }
     lastTime = time;  // it just got done
-    randomTime = 1500 + random(8500); // random amount of time 1.5 to 10 seconds
+    randomTime = 1500 + random(4500); // random amount of time 1.5 to 10 seconds
   }
 
 
@@ -213,50 +214,50 @@ void lightning(){
   }
 }
 
-#define allDarkTime 3000 // how long allDark lasts
+#define allDarkTime 2000 // how long allDark lasts
 void allDark(){
   for(i = 0; i < numLevels; i++) {
-    digitalWrite(pin[i], LOW);  // all lights off
+    SoftPWMSet(pin[i], 0);  // all lights off
   }
   delay(allDarkTime);
 }
 
 void allOn(){
   for(i = 0; i < numLevels; i++) {
-    digitalWrite(pin[i], HIGH);  // all lights ON
+    SoftPWMSet(pin[i], 255);  // all lights ON
   }
 }
 
 void doTheSweep(){
   for (i = 0; i < numTree; i++) { // Send light up the tree with a 100ms delay between each segment.
-    digitalWrite(tree[i], HIGH);
+    SoftPWMSet(tree[i], 255);
     delay(100);
   }
   for (i = 0; i < numBranches; i++) { // Light the branches up with a 100 mS delay between each
-    digitalWrite(branches[i], HIGH);
+    SoftPWMSet(branches[i], 255);
     delay(100);
   }
   delay(100);
   for (i = 0; i < numBranches; i++) { // 3. Now darken one branch at a time in the same order
-    digitalWrite(branches[i], LOW);  // darken
+    SoftPWMSet(branches[i], 0);  // darken
     delay(100);
-    digitalWrite(branches[i], HIGH); // turn it back on
+    SoftPWMSet(branches[i], 255); // turn it back on
   }
   delay(100);
   // Repeat step 3.
   for (i = 0; i < numBranches; i++) { // 3. Now darken one branch at a time in the same order
-    digitalWrite(branches[i], 0);  // darken
+    SoftPWMSet(branches[i], 0);  // darken
     delay(100);
-    digitalWrite(branches[i], 255); // turn it back on
+    SoftPWMSet(branches[i], 255); // turn it back on
   }
   delay(100);
   for (i = (numBranches-1); i >= 0; i--) {  // reverse order - start with last and go backwards
-    digitalWrite(branches[i], 0);  // darken
+    SoftPWMSet(branches[i], 0);  // darken
     delay(100);
   }
   delay(100);
   for (i = (numTree-1); i >= 0; i--) {  // reverse order - start with last and go backwards
-    digitalWrite(tree[i], 0);  // darken
+    SoftPWMSet(tree[i], 0);  // darken
     delay(100);
   }
   delay(100);
@@ -268,10 +269,10 @@ void randomLights(){
   while (millis() - time < randomLightsTime) {  // repeat until time is up
     pattern = random(2048); // up to 11 bits
     for (i=0; i < numLevels; i++) if (pattern & 2^i) {
-      digitalWrite(pin[i],255);
+      SoftPWMSet(pin[i],255);
     }
     else {
-      digitalWrite(pin[i],0);
+      SoftPWMSet(pin[i],0);
     }
     delay(pattern*20); // 10-20 times slower
   }
