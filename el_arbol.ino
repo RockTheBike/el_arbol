@@ -9,19 +9,19 @@
 
 #define numLevels 15
 int pin[numLevels] = {
-  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A1, A2, A3};
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A2, A4, A5};
 
 #define numTree 8
 byte tree[numTree] = {
-  8,2,7,4,13,12,A2,10};
+  8,2,7,4,13,12,A4,10};
 
 #define numBranches 8
 byte branches[numBranches] = {
-  6,9,A1,5,3,12,11,A3};
+  6,9,A2,5,3,12,11,A5};
 
 #define numFlickers 5
 byte flickers[numFlickers] = {
-  2,4,13,A2,12};
+  2,4,13,A4,12};
 
 float levelVolt[numLevels] = {
   15.0, 25.0, 25.5, 26.0, 27.3, 28.2, 28.6, 29.2, 30.4, 30.8, 31.2}; // for testing
@@ -33,12 +33,12 @@ const int onoff = 1;
 // Arduino pin used as input to voltage sensor
 const int voltpin = A0; // Voltage Sensor Input
 const int ampspin = A3; // amperage sensor input
-const int knobpin = A5; // rotary knob control input
+#define KNOBPIN A1 // rotary knob control input
 const float knobfactor = 0.50;  // factor by which the knob affects voltish
 
-const float voltcoeff = 13.35;  // for teal and brown resistors
+#define VOLTCOEFF 13.179
 const float ampscoeff = 20.25;  // ADC value divided by this equals amps
-const int ampszero = 513.89;  // ADC value corresponding to 0 amps
+#define AMPSZERO 509.0  // ADC value corresponding to 0 amps
 
 //MAXIMUM VOLTAGE TO GIVE LEDS
 //const float maxvolt = 24 -- always run LEDs in 24V series configuration.
@@ -54,7 +54,7 @@ float amperage = 0;
 int state[numLevels];
 
 const int AVG_CYCLES = 50; // average measured voltage over this many samples
-const int DISPLAY_INTERVAL_MS = 100; // when auto-display is on, display every this many milli-seconds
+const int DISPLAY_INTERVAL_MS = 500; // when auto-display is on, display every this many milli-seconds
 const int VICTORYTIME=500;
 
 int readCount = 0; // for determining how many sample cycle occur per display interval
@@ -175,11 +175,11 @@ void loop() {
   }
 
 
-  //  if (analogRead(knobpin) < 341) {
+  //  if (analogRead(KNOBPIN) < 341) {
   //  for (i=0; i < numLevels; i++) digitalWrite(pin[i],LOW);
   //  if ((pattern & 15) < 12) digitalWrite(pin[(pattern & 15)],HIGH);
   //  } else
-  //  if (analogRead(knobpin) < 682) {
+  //  if (analogRead(KNOBPIN) < 682) {
   //  } else {
   //    for (i=0; i < numLevels; i++) digitalWrite(pin[i],HIGH);
   //  }
@@ -287,8 +287,8 @@ void getvoltage(){  // gets voltage AND amperage
     voltish = voltage;
   }
   else {
-    voltish = VOLTKNEE + ((voltage - VOLTKNEE)* (1.0 + (float(analogRead(knobpin) - 512)/512.0*knobfactor)));
-    // knobpin can read between 0 and 1023, -511 to 511 times knobfactor
+    voltish = VOLTKNEE + ((voltage - VOLTKNEE)* (1.0 + (float(analogRead(KNOBPIN) - 512)/512.0*knobfactor)));
+    // KNOBPIN can read between 0 and 1023, -511 to 511 times knobfactor
     // means voltage * (1 + -knobfactor to +knobfactor)
     // if knobfactor is 0.50 then voltish can be 50 to 150% of voltage
   }
@@ -327,11 +327,11 @@ static int volts2adc(float v){
 float adc2volts(float adc){
   // v = adc * 110/10 * 5 / 1024 == adc * 0.0537109375;
   //  return adc * 0.0537109375; // 55 / 1024 = 0.0537109375;
-  return adc / voltcoeff;
+  return adc / VOLTCOEFF;
 }
 
 float adc2amps(float adc){
-  return (adc - ampszero) / ampscoeff;
+  return (adc - AMPSZERO) / ampscoeff;
 }
 
 
@@ -342,7 +342,9 @@ void printDisplay(){
   Serial.print(voltish);
   Serial.print(", amperage: ");
   Serial.print(amperage);
-  Serial.print(", Levels ");
+  Serial.print(" (");
+  Serial.print(analogRead(ampspin));
+  Serial.print("), Levels ");
   for(i = 0; i < numLevels; i++) {
     Serial.print(i);
     Serial.print("=");
