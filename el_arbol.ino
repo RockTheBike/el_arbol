@@ -8,6 +8,7 @@
 //#include <SoftPWM.h>
 
 #define TESTMODE_KNOBVAL 100 // if knob is lower than this value, do testPins()
+#define RANDOMMODE_KNOBVAL 1023-100 // if knob is higher than this, do randomMode()
 #define numLevels 15
 int pin[numLevels] = {
   2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A2, A4, A5};
@@ -116,6 +117,7 @@ boolean victory = false;  // have we won?
 
 void loop() {
   while (analogRead(KNOBPIN) < TESTMODE_KNOBVAL) testPins();
+  while (analogRead(KNOBPIN) > RANDOMMODE_KNOBVAL) randomMode();
   time = millis();
   getvoltage();  // gets voltage AND amperage AND VOLTISH
   readCount++;
@@ -191,6 +193,21 @@ void loop() {
     printDisplay();
     readCount = 0;
   }
+}
+
+void randomMode() {
+  Serial.println("randomMode()");
+  Serial.println("lightning()");
+  lightning();
+  {
+    Serial.println("allOn()");
+    allOn();
+    delay(5000);
+  }
+  Serial.println("doTheSweep()");
+  doTheSweep();
+  Serial.println("randomLights()");
+  randomLights();
 }
 
 void testPins() {
